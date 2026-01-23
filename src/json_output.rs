@@ -33,11 +33,17 @@ pub async fn write() {
         data.push_str("\", \"torrents\": [\n");
         {
             let torrents = TORRENTS.read().await;
+            let mut first = true;
             for m in torrents.iter() {
+                if first {
+                    first = false;
+                } else {
+                    data.push(',');
+                }
                 data.push_str(&m.lock().await.to_json());
             }
         }
-        data.push_str("]}");
+        data.push_str("\n]}");
         if let Err(e) = tokio::fs::write(path, data.as_bytes()).await {
             error!("Cannot write stat file: {e}");
         }
